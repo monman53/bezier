@@ -7,8 +7,16 @@
 </style>
 
 <div id="app">
-    <svg width="500" height="500" :view-box.camel="viewBoxStr" id="svg" @mousemove="mouseMove"
+    <svg width="720" height="480" :view-box.camel="viewBoxStr" id="svg" @mousemove="mouseMove"
         @mouseup="removeMoveHandler">
+        <!-- Grid -->
+        <g v-for="x in gridXs">
+            <line :x1="x" :y1="viewBox.y" :x2="x" :y2="viewBox.y+viewBox.h" stroke="lightgray"></line>
+        </g>
+        <g v-for="y in gridYs">
+            <line :x1="viewBox.x" :y1="y" :x2="viewBox.x+viewBox.w" :y2="y" stroke="lightgray"></line>
+        </g>
+        <!-- Bezier curves -->
         <g v-for="bezier in beziers">
             <g v-show="options.showBaseline">
                 <line :x1="bezier.p0.x" :y1="bezier.p0.y" :x2="bezier.p3.x" :y2="bezier.p3.y" stroke="red" />
@@ -102,22 +110,17 @@
                 viewBox: {
                     x: 0,
                     y: 0,
-                    w: 100,
-                    h: 100,
+                    w: 300,
+                    h: 200,
                 },
                 scale: 1,
+                gridInterval: 50,
                 beziers: [
                     {
-                        p0: { x: 10, y: 10 },
-                        p1: { x: 20, y: 20 },
-                        p2: { x: 40, y: 20 },
-                        p3: { x: 50, y: 10 },
-                    },
-                    {
-                        p0: { x: 10, y: 40 },
-                        p1: { x: 20, y: 50 },
-                        p2: { x: 40, y: 30 },
-                        p3: { x: 50, y: 40 },
+                        p0: { x: 50, y: 150 },
+                        p1: { x: 100, y: 50 },
+                        p2: { x: 150, y: 150 },
+                        p3: { x: 200, y: 50 },
                     }
                 ],
                 division: 5,
@@ -141,6 +144,24 @@
                     res.push(1.0 / this.division * t);
                 }
                 console.log(res);
+                return res;
+            },
+            gridXs() {
+                const v = this.viewBox;
+                let x = Math.floor(v.x / this.gridInterval) * this.gridInterval;
+                let res = [];
+                for (; x < v.x + v.w; x += this.gridInterval) {
+                    res.push(x);
+                }
+                return res;
+            },
+            gridYs() {
+                const v = this.viewBox;
+                let y = Math.floor(v.y / this.gridInterval) * this.gridInterval;
+                let res = [];
+                for (; y < v.y + v.h; y += this.gridInterval) {
+                    res.push(y);
+                }
                 return res;
             },
         },

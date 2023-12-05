@@ -10,15 +10,18 @@
     <svg width="500" height="500" :view-box.camel="viewBoxStr" id="svg" @mousemove="mouseMove"
         @mouseup="removeMoveHandler">
         <g v-for="bezier in beziers">
-            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent"  pointer-events="visiblePainted"/>
+            <g v-show="options.showBaseline">
+                <line :x1="bezier.p0.x" :y1="bezier.p0.y" :x2="bezier.p3.x" :y2="bezier.p3.y" stroke="red" />
+            </g>
             <g v-show="options.showControlLines">
                 <path :d="calcControlLineD(bezier)" stroke="green" fill="transparent" />
             </g>
+            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent"  pointer-events="visiblePainted"/>
             <g v-show="options.showControlPoints">
-                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p0)"/>
-                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p1)"/>
-                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p2)"/>
-                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p3)"/>
+                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p0)"/>
+                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p1)"/>
+                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p2)"/>
+                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p3)"/>
             </g>
         </g>
     </svg>
@@ -35,6 +38,11 @@
             <label>
                 <input type="checkbox" v-model="options.showControlLines">
                 Control Lines
+                <br>
+            </label>
+            <label>
+                <input type="checkbox" v-model="options.showBaseline">
+                Baseline
                 <br>
             </label>
         </fieldset>
@@ -100,6 +108,7 @@
                 options: {
                     showControlPoints: true,
                     showControlLines: true,
+                    showBaseline: true,
                 },
                 moveHandler: null,
             }
@@ -170,7 +179,6 @@
                 if (this.moveHandler !== null) {
                     this.moveHandler(e);
                 }
-                // console.log(this.getMousePosition(e));
             },
             removeMoveHandler() {
                 this.moveHandler = null;

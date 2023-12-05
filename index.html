@@ -2,7 +2,7 @@
 
 <style>
     /* svg { */
-        /* pointer-events: visiblePainted; */
+    /* pointer-events: visiblePainted; */
     /* } */
 </style>
 
@@ -13,15 +13,25 @@
             <g v-show="options.showBaseline">
                 <line :x1="bezier.p0.x" :y1="bezier.p0.y" :x2="bezier.p3.x" :y2="bezier.p3.y" stroke="red" />
             </g>
+            <g v-show="options.showDivisionPoints">
+                <g v-for="t in ts">
+                    <circle :cx="calcDivisionPoint(bezier, t)[0]" :cy="calcDivisionPoint(bezier, t)[1]" stroke="black"
+                        fill="black" r="1.5" />
+                </g>
+            </g>
             <g v-show="options.showControlLines">
                 <path :d="calcControlLineD(bezier)" stroke="green" fill="transparent" />
             </g>
-            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent"  pointer-events="visiblePainted"/>
+            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent" pointer-events="visiblePainted" />
             <g v-show="options.showControlPoints">
-                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p0)"/>
-                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p1)"/>
-                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p2)"/>
-                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p3)"/>
+                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" r="1.5"
+                    @mousedown="controlPointMoveHandler($event, bezier.p0)" />
+                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" r="1.5"
+                    @mousedown="controlPointMoveHandler($event, bezier.p1)" />
+                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" r="1.5"
+                    @mousedown="controlPointMoveHandler($event, bezier.p2)" />
+                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" r="1.5"
+                    @mousedown="controlPointMoveHandler($event, bezier.p3)" />
             </g>
         </g>
     </svg>
@@ -43,6 +53,11 @@
             <label>
                 <input type="checkbox" v-model="options.showBaseline">
                 Baseline
+                <br>
+            </label>
+            <label>
+                <input type="checkbox" v-model="options.showDivisionPoints">
+                Division Points
                 <br>
             </label>
         </fieldset>
@@ -105,10 +120,12 @@
                         p3: { x: 50, y: 40 },
                     }
                 ],
+                division: 5,
                 options: {
                     showControlPoints: true,
                     showControlLines: true,
                     showBaseline: true,
+                    showDivisionPoints: true,
                 },
                 moveHandler: null,
             }
@@ -117,7 +134,15 @@
             viewBoxStr() {
                 const v = this.viewBox;
                 return `${v.x} ${v.y} ${v.w} ${v.h}`;
-            }
+            },
+            ts() {
+                let res = [];
+                for (let t = 1; t < this.division; t += 1) {
+                    res.push(1.0 / this.division * t);
+                }
+                console.log(res);
+                return res;
+            },
         },
         methods: {
             calcBezierD(bezier) {
@@ -153,6 +178,25 @@
                 const y3 = b.p3.y;
 
                 return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3}`;
+            },
+            calcDivisionPoint(bezier, t) {
+                const b = bezier;
+
+                const x0 = b.p0.x;
+                const y0 = b.p0.y;
+
+                const x1 = b.p1.x;
+                const y1 = b.p1.y;
+
+                const x2 = b.p2.x;
+                const y2 = b.p2.y;
+
+                const x3 = b.p3.x;
+                const y3 = b.p3.y;
+
+                const x = (x3 - 3 * x2 + 3 * x1 - x0) * t * t * t + (3 * x2 - 6 * x1 + 3 * x0) * t * t + (3 * x1 - 3 * x0) * t + x0;
+                const y = (y3 - 3 * y2 + 3 * y1 - y0) * t * t * t + (3 * y2 - 6 * y1 + 3 * y0) * t * t + (3 * y1 - 3 * y0) * t + y0;
+                return [x, y];
             },
             getMousePosition(e) {
                 const rect = this.svg.getBoundingClientRect()

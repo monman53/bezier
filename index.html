@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<div id="app">
+    <svg width="500" height="500" viewBox="0 0 100 100" id="main-svg">
+        <g v-for="bezier in beziers">
+            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent" />
+            <g v-show="options.showControlLines">
+                <path :d="calcControlLineD(bezier)" stroke="black" fill="transparent" />
+            </g>
+            <g v-show="options.showControlPoints">
+                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" r="1" />
+                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" r="1" />
+                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" r="1" />
+                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" r="1" />
+            </g>
+        </g>
+    </svg>
+
+    <div>
+        <fieldset>
+            <legend>Options</legend>
+            <!-- Checkboxes -->
+            <label>
+                <input type="checkbox" v-model="options.showControlPoints">
+                Control Points
+                <br>
+            </label>
+            <label>
+                <input type="checkbox" v-model="options.showControlLines">
+                Control Lines
+                <br>
+            </label>
+        </fieldset>
+        <fieldset>
+            <legend>Bezier List</legend>
+            <table>
+                <tr>
+                    <th>Bezier ID</th>
+                    <th>x0</th>
+                    <th>y0</th>
+                    <th>x1</th>
+                    <th>y1</th>
+                    <th>x2</th>
+                    <th>y2</th>
+                    <th>x3</th>
+                    <th>y3</th>
+                </tr>
+                <tr v-for="(bezier, idx) in beziers">
+                    <td>{{ idx }}</td>
+                    <td><input v-model.number="bezier.p0.x" size="5" /></td>
+                    <td><input v-model.number="bezier.p0.y" size="5" /></td>
+                    <td><input v-model.number="bezier.p1.x" size="5" /></td>
+                    <td><input v-model.number="bezier.p1.y" size="5" /></td>
+                    <td><input v-model.number="bezier.p2.x" size="5" /></td>
+                    <td><input v-model.number="bezier.p2.y" size="5" /></td>
+                    <td><input v-model.number="bezier.p3.x" size="5" /></td>
+                    <td><input v-model.number="bezier.p3.y" size="5" /></td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+</div>
+
+<script type="module">
+    // import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
+
+    createApp({
+        data() {
+            return {
+                svg: undefined,
+                viewBox: {
+                    x: 0,
+                    y: 0,
+                    w: 0,
+                    h: 0,
+                },
+                scale: 1,
+                beziers: [
+                    {
+                        p0: { x: 10, y: 10 },
+                        p1: { x: 20, y: 20 },
+                        p2: { x: 40, y: 20 },
+                        p3: { x: 50, y: 10 },
+                    },
+                    {
+                        p0: { x: 10, y: 40 },
+                        p1: { x: 20, y: 50 },
+                        p2: { x: 40, y: 30 },
+                        p3: { x: 50, y: 40 },
+                    }
+                ],
+                options: {
+                    showControlPoints: true,
+                    showControlLines: true,
+                },
+                moveHandler: null,
+            }
+        },
+        computed: {
+        },
+        methods: {
+            calcBezierD(bezier) {
+                const b = bezier;
+
+                const x0 = b.p0.x;
+                const y0 = b.p0.y;
+
+                const x1 = b.p1.x;
+                const y1 = b.p1.y;
+
+                const x2 = b.p2.x;
+                const y2 = b.p2.y;
+
+                const x3 = b.p3.x;
+                const y3 = b.p3.y;
+
+                return `M ${x0} ${y0} C ${x1} ${y1}, ${x2} ${y2}, ${x3} ${y3}`;
+            },
+            calcControlLineD(bezier) {
+                const b = bezier;
+
+                const x0 = b.p0.x;
+                const y0 = b.p0.y;
+
+                const x1 = b.p1.x;
+                const y1 = b.p1.y;
+
+                const x2 = b.p2.x;
+                const y2 = b.p2.y;
+
+                const x3 = b.p3.x;
+                const y3 = b.p3.y;
+
+                return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3}`;
+            },
+            getMousePosition(e) {
+                const rect = this.svg.getBoundingClientRect()
+                const xPix = e.clientX - rect.left;
+                const yPix = e.clientY - rect.top;
+                const x = xPix / this.scale + this.viewBox.x;
+                const y = yPix / this.scale + this.viewBox.y;
+                return [x, y];
+            },
+            lightMoveHandler(e, light) {
+                const [sx, sy] = this.getMousePosition(e);
+                const x = light.x;
+                const y = light.y;
+
+                const handler = (e) => {
+                    const [tx, ty] = this.getMousePosition(e);
+                    const nx = x + (tx - sx);
+                    const ny = y + (ty - sy);
+                    const maxX = this.lens.x - this.lens.f * 1.01;
+                    light.x = maxX < nx ? maxX : nx;
+                    light.y = ny;
+                };
+
+                this.moveHandler = handler;
+            },
+        },
+        mounted() {
+        },
+    }).mount('#app')
+</script>

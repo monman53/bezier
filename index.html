@@ -66,6 +66,8 @@
             <label>
                 <input type="checkbox" v-model="options.showDivisionPoints">
                 Division Points
+                <input type="range" min="0" max="30" step="1" v-model="division"> 
+                <input v-model.number="division" size="5" />
                 <br>
             </label>
         </fieldset>
@@ -143,7 +145,6 @@
                 for (let t = 1; t < this.division; t += 1) {
                     res.push(1.0 / this.division * t);
                 }
-                console.log(res);
                 return res;
             },
             gridXs() {

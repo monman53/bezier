@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 
+<style>
+    /* svg { */
+        /* pointer-events: visiblePainted; */
+    /* } */
+</style>
+
 <div id="app">
-    <svg width="500" height="500" viewBox="0 0 100 100" id="main-svg">
+    <svg width="500" height="500" :view-box.camel="viewBoxStr" id="svg" @mousemove="mouseMove"
+        @mouseup="removeMoveHandler">
         <g v-for="bezier in beziers">
-            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent" />
+            <path :d="calcBezierD(bezier)" stroke="black" fill="transparent"  pointer-events="visiblePainted"/>
             <g v-show="options.showControlLines">
-                <path :d="calcControlLineD(bezier)" stroke="black" fill="transparent" />
+                <path :d="calcControlLineD(bezier)" stroke="green" fill="transparent" />
             </g>
             <g v-show="options.showControlPoints">
-                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" r="1" />
-                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" r="1" />
-                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" r="1" />
-                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" r="1" />
+                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p0)"/>
+                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p1)"/>
+                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p2)"/>
+                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="red" fill="red" r="1.5" @mousedown="controlPointMoveHandler($event, bezier.p3)"/>
             </g>
         </g>
     </svg>
@@ -62,18 +69,18 @@
 </div>
 
 <script type="module">
-    // import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-    import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    // import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
 
     createApp({
         data() {
             return {
-                svg: undefined,
+                svg: null,
                 viewBox: {
                     x: 0,
                     y: 0,
-                    w: 0,
-                    h: 0,
+                    w: 100,
+                    h: 100,
                 },
                 scale: 1,
                 beziers: [
@@ -98,6 +105,10 @@
             }
         },
         computed: {
+            viewBoxStr() {
+                const v = this.viewBox;
+                return `${v.x} ${v.y} ${v.w} ${v.h}`;
+            }
         },
         methods: {
             calcBezierD(bezier) {
@@ -138,28 +149,35 @@
                 const rect = this.svg.getBoundingClientRect()
                 const xPix = e.clientX - rect.left;
                 const yPix = e.clientY - rect.top;
-                const x = xPix / this.scale + this.viewBox.x;
-                const y = yPix / this.scale + this.viewBox.y;
+                const x = xPix / (rect.width) * (this.viewBox.w) + this.viewBox.x;
+                const y = yPix / (rect.height) * (this.viewBox.h) + this.viewBox.y;
                 return [x, y];
             },
-            lightMoveHandler(e, light) {
+            controlPointMoveHandler(e, p) {
                 const [sx, sy] = this.getMousePosition(e);
-                const x = light.x;
-                const y = light.y;
+                const x = p.x;
+                const y = p.y;
 
                 const handler = (e) => {
                     const [tx, ty] = this.getMousePosition(e);
-                    const nx = x + (tx - sx);
-                    const ny = y + (ty - sy);
-                    const maxX = this.lens.x - this.lens.f * 1.01;
-                    light.x = maxX < nx ? maxX : nx;
-                    light.y = ny;
+                    p.x = x + (tx - sx);
+                    p.y = y + (ty - sy);
                 };
 
                 this.moveHandler = handler;
             },
+            mouseMove(e) {
+                if (this.moveHandler !== null) {
+                    this.moveHandler(e);
+                }
+                // console.log(this.getMousePosition(e));
+            },
+            removeMoveHandler() {
+                this.moveHandler = null;
+            },
         },
         mounted() {
+            this.svg = document.getElementById("svg");
         },
     }).mount('#app')
 </script>

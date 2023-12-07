@@ -29,7 +29,7 @@
             </g>
             <!-- Baseline -->
             <g v-show="options.showBaseline">
-                <line :x1="bezier.p0.x" :y1="bezier.p0.y" :x2="bezier.p3.x" :y2="bezier.p3.y" stroke="red" />
+                <line :x1="bezier.ps[0].x" :y1="bezier.ps[0].y" :x2="bezier.ps[3].x" :y2="bezier.ps[3].y" stroke="red" />
             </g>
             <!-- Division Points -->
             <g v-show="options.showDivisionPoints">
@@ -45,14 +45,14 @@
             <path :d="calcBezierD(bezier)" stroke="black" fill="transparent" pointer-events="visiblePainted" />
             <!-- Control Points -->
             <g v-show="options.showControlPoints">
-                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" :r="nodeR"
-                    @mousedown="controlPointMoveHandler($event, bezier.p0)" />
-                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" :r="nodeR"
-                    @mousedown="controlPointMoveHandler($event, bezier.p1)" />
-                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" :r="nodeR"
-                    @mousedown="controlPointMoveHandler($event, bezier.p2)" />
-                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" :r="nodeR"
-                    @mousedown="controlPointMoveHandler($event, bezier.p3)" />
+                <circle :cx="bezier.ps[0].x" :cy="bezier.ps[0].y" stroke="green" fill="green" :r="nodeR"
+                    @mousedown="controlPointMoveHandler($event, bezier.ps[0])" />
+                <circle :cx="bezier.ps[1].x" :cy="bezier.ps[1].y" stroke="green" fill="green" :r="nodeR"
+                    @mousedown="controlPointMoveHandler($event, bezier.ps[1])" />
+                <circle :cx="bezier.ps[2].x" :cy="bezier.ps[2].y" stroke="green" fill="green" :r="nodeR"
+                    @mousedown="controlPointMoveHandler($event, bezier.ps[2])" />
+                <circle :cx="bezier.ps[3].x" :cy="bezier.ps[3].y" stroke="green" fill="green" :r="nodeR"
+                    @mousedown="controlPointMoveHandler($event, bezier.ps[3])" />
             </g>
         </g>
     </svg>
@@ -119,14 +119,14 @@
                 </tr>
                 <tr v-for="(bezier, idx) in beziers">
                     <td>{{ idx }}</td>
-                    <td><input v-model.number="bezier.p0.x" size="5" /></td>
-                    <td><input v-model.number="bezier.p0.y" size="5" /></td>
-                    <td><input v-model.number="bezier.p1.x" size="5" /></td>
-                    <td><input v-model.number="bezier.p1.y" size="5" /></td>
-                    <td><input v-model.number="bezier.p2.x" size="5" /></td>
-                    <td><input v-model.number="bezier.p2.y" size="5" /></td>
-                    <td><input v-model.number="bezier.p3.x" size="5" /></td>
-                    <td><input v-model.number="bezier.p3.y" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[0].x" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[0].y" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[1].x" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[1].y" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[2].x" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[2].y" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[3].x" size="5" /></td>
+                    <td><input v-model.number="bezier.ps[3].y" size="5" /></td>
                 </tr>
             </table>
         </fieldset>
@@ -151,10 +151,12 @@
                 gridInterval: 50,
                 beziers: [
                     {
-                        p0: { x: 50, y: 150 },
-                        p1: { x: 100, y: 50 },
-                        p2: { x: 150, y: 150 },
-                        p3: { x: 200, y: 50 },
+                        ps: [
+                            { x: 50, y: 150 },
+                            { x: 100, y: 50 },
+                            { x: 150, y: 150 },
+                            { x: 200, y: 50 },
+                        ]
                     }
                 ],
                 division: 5,
@@ -203,53 +205,55 @@
         },
         methods: {
             calcBezierD(bezier) {
-                const b = bezier;
+                let res = "";
 
-                const x0 = b.p0.x;
-                const y0 = b.p0.y;
+                const ps = bezier.ps;
+                const d = ps.length;
 
-                const x1 = b.p1.x;
-                const y1 = b.p1.y;
+                res += `M ${ps[0].x} ${ps[0].y} `;
 
-                const x2 = b.p2.x;
-                const y2 = b.p2.y;
+                if (d === 2) {
+                    // Quadratic
+                    res += "Q "
+                } else {
+                    // Cubic
+                    res += "C "
+                }
 
-                const x3 = b.p3.x;
-                const y3 = b.p3.y;
+                for (let i=1;i<d;i+=1){
+                    res += `${ps[i].x} ${ps[i].y}, `;
+                }
 
-                return `M ${x0} ${y0} C ${x1} ${y1}, ${x2} ${y2}, ${x3} ${y3}`;
+                return res;
             },
             calcControlLineD(bezier) {
-                const b = bezier;
+                let res = "";
 
-                const x0 = b.p0.x;
-                const y0 = b.p0.y;
+                const ps = bezier.ps;
+                const d = ps.length;
 
-                const x1 = b.p1.x;
-                const y1 = b.p1.y;
+                res += `M ${ps[0].x} ${ps[0].y} `;
 
-                const x2 = b.p2.x;
-                const y2 = b.p2.y;
+                for (let i=1;i<d;i+=1){
+                    res += `L ${ps[i].x} ${ps[i].y} `;
+                }
 
-                const x3 = b.p3.x;
-                const y3 = b.p3.y;
-
-                return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3}`;
+                return res;
             },
             calcDivisionPoint(bezier, t) {
                 const b = bezier;
 
-                const x0 = b.p0.x;
-                const y0 = b.p0.y;
+                const x0 = b.ps[0].x;
+                const y0 = b.ps[0].y;
 
-                const x1 = b.p1.x;
-                const y1 = b.p1.y;
+                const x1 = b.ps[1].x;
+                const y1 = b.ps[1].y;
 
-                const x2 = b.p2.x;
-                const y2 = b.p2.y;
+                const x2 = b.ps[2].x;
+                const y2 = b.ps[2].y;
 
-                const x3 = b.p3.x;
-                const y3 = b.p3.y;
+                const x3 = b.ps[3].x;
+                const y3 = b.ps[3].y;
 
                 const x = (x3 - 3 * x2 + 3 * x1 - x0) * t * t * t + (3 * x2 - 6 * x1 + 3 * x0) * t * t + (3 * x1 - 3 * x0) * t + x0;
                 const y = (y3 - 3 * y2 + 3 * y1 - y0) * t * t * t + (3 * y2 - 6 * y1 + 3 * y0) * t * t + (3 * y1 - 3 * y0) * t + y0;
@@ -257,10 +261,10 @@
             },
             calcBezierBoundingBox(bezier) {
                 const b = bezier;
-                const sx = Math.min(b.p0.x, b.p1.x, b.p2.x, b.p3.x);
-                const sy = Math.min(b.p0.y, b.p1.y, b.p2.y, b.p3.y);
-                const tx = Math.max(b.p0.x, b.p1.x, b.p2.x, b.p3.x);
-                const ty = Math.max(b.p0.y, b.p1.y, b.p2.y, b.p3.y);
+                const sx = Math.min(b.ps[0].x, b.ps[1].x, b.ps[2].x, b.ps[3].x);
+                const sy = Math.min(b.ps[0].y, b.ps[1].y, b.ps[2].y, b.ps[3].y);
+                const tx = Math.max(b.ps[0].x, b.ps[1].x, b.ps[2].x, b.ps[3].x);
+                const ty = Math.max(b.ps[0].y, b.ps[1].y, b.ps[2].y, b.ps[3].y);
                 return { sx: sx, sy: sy, tx: tx, ty: ty };
             },
             getMousePosition(e) {

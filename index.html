@@ -29,7 +29,8 @@
             </g>
             <!-- Baseline -->
             <g v-show="options.showBaseline">
-                <line :x1="bezier.ps[0].x" :y1="bezier.ps[0].y" :x2="bezier.ps[3].x" :y2="bezier.ps[3].y" stroke="red" />
+                <line :x1="bezier.ps[0].x" :y1="bezier.ps[0].y" :x2="bezier.ps[3].x" :y2="bezier.ps[3].y"
+                    stroke="red" />
             </g>
             <!-- Division Points -->
             <g v-show="options.showDivisionPoints">
@@ -108,26 +109,22 @@
             <table>
                 <tr>
                     <th>Bezier ID</th>
-                    <th>x0</th>
-                    <th>y0</th>
-                    <th>x1</th>
-                    <th>y1</th>
-                    <th>x2</th>
-                    <th>y2</th>
-                    <th>x3</th>
-                    <th>y3</th>
+                    <th></th>
+                    <th>p0</th>
+                    <th>p1</th>
+                    <th>p2</th>
+                    <th>p3</th>
                 </tr>
-                <tr v-for="(bezier, idx) in beziers">
-                    <td>{{ idx }}</td>
-                    <td><input v-model.number="bezier.ps[0].x" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[0].y" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[1].x" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[1].y" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[2].x" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[2].y" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[3].x" size="5" /></td>
-                    <td><input v-model.number="bezier.ps[3].y" size="5" /></td>
-                </tr>
+                <template v-for="(bezier, idx) in beziers">
+                    <tr>
+                        <td>{{ idx }}x</td>
+                        <td v-for="p in bezier.ps"><input v-model.number="p.x" size="5" /></td>
+                    </tr>
+                    <tr>
+                        <td>{{ idx }}y</td>
+                        <td v-for="p in bezier.ps"><input v-model.number="p.y" size="5" /></td>
+                    </tr>
+                </template>
             </table>
         </fieldset>
     </div>
@@ -220,7 +217,7 @@
                     res += "C "
                 }
 
-                for (let i=1;i<d;i+=1){
+                for (let i = 1; i < d; i += 1) {
                     res += `${ps[i].x} ${ps[i].y}, `;
                 }
 
@@ -234,7 +231,7 @@
 
                 res += `M ${ps[0].x} ${ps[0].y} `;
 
-                for (let i=1;i<d;i+=1){
+                for (let i = 1; i < d; i += 1) {
                     res += `L ${ps[i].x} ${ps[i].y} `;
                 }
 

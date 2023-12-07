@@ -117,11 +117,13 @@
                 </tr>
                 <template v-for="(bezier, idx) in beziers">
                     <tr>
-                        <td>{{ idx }}x</td>
+                        <td>{{ idx }}</td>
+                        <td>x</td>
                         <td v-for="p in bezier.ps"><input v-model.number="p.x" size="5" /></td>
                     </tr>
                     <tr>
-                        <td>{{ idx }}y</td>
+                        <td></td>
+                        <td>y</td>
                         <td v-for="p in bezier.ps"><input v-model.number="p.y" size="5" /></td>
                     </tr>
                 </template>

@@ -24,7 +24,8 @@
         <g v-for="bezier in beziers">
             <!-- Bounding Box -->
             <g v-show="options.showBezierBoundingBox" :set="box = calcBezierBoundingBox(bezier)">
-                <rect :x="box.sx" :y="box.sy" :width="box.tx-box.sx" :height="box.ty-box.sy" stroke="blue" fill="transparent"/>
+                <rect :x="box.sx" :y="box.sy" :width="box.tx-box.sx" :height="box.ty-box.sy" stroke="blue"
+                    fill="transparent" />
             </g>
             <!-- Baseline -->
             <g v-show="options.showBaseline">
@@ -33,7 +34,7 @@
             <!-- Division Points -->
             <g v-show="options.showDivisionPoints">
                 <g v-for="t in ts" :set="p = calcDivisionPoint(bezier, t)">
-                    <circle :cx="p.x" :cy="p.y" stroke="black" fill="black" r="1.5" />
+                    <circle :cx="p.x" :cy="p.y" stroke="black" fill="black" :r="nodeR" />
                 </g>
             </g>
             <!-- Control Lines -->
@@ -44,13 +45,13 @@
             <path :d="calcBezierD(bezier)" stroke="black" fill="transparent" pointer-events="visiblePainted" />
             <!-- Control Points -->
             <g v-show="options.showControlPoints">
-                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" r="1.5"
+                <circle :cx="bezier.p0.x" :cy="bezier.p0.y" stroke="green" fill="green" :r="nodeR"
                     @mousedown="controlPointMoveHandler($event, bezier.p0)" />
-                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" r="1.5"
+                <circle :cx="bezier.p1.x" :cy="bezier.p1.y" stroke="green" fill="green" :r="nodeR"
                     @mousedown="controlPointMoveHandler($event, bezier.p1)" />
-                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" r="1.5"
+                <circle :cx="bezier.p2.x" :cy="bezier.p2.y" stroke="green" fill="green" :r="nodeR"
                     @mousedown="controlPointMoveHandler($event, bezier.p2)" />
-                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" r="1.5"
+                <circle :cx="bezier.p3.x" :cy="bezier.p3.y" stroke="green" fill="green" :r="nodeR"
                     @mousedown="controlPointMoveHandler($event, bezier.p3)" />
             </g>
         </g>
@@ -62,12 +63,12 @@
             <!-- Checkboxes -->
             <label>
                 <input type="checkbox" v-model="options.showControlPoints">
-                Control Points
+                Control points
                 <br>
             </label>
             <label>
                 <input type="checkbox" v-model="options.showControlLines">
-                Control Lines
+                Control lines
                 <br>
             </label>
             <label>
@@ -77,7 +78,7 @@
             </label>
             <label>
                 <input type="checkbox" v-model="options.showDivisionPoints">
-                Division Points
+                Division points
                 <input type="range" min="0" max="30" step="1" v-model="division">
                 <input v-model.number="division" size="5" />
                 <br>
@@ -89,7 +90,16 @@
             </label>
             <label>
                 <input type="checkbox" v-model="options.showBezierBoundingBox">
-                Bezier Bounding Box
+                Bezier bounding box
+                <br>
+            </label>
+        </fieldset>
+        <fieldset>
+            <legend>Styles</legend>
+            <label>
+                Node radius
+                <input type="range" min="0" max="10" step="0.01" v-model="nodeR">
+                <input v-model.number="nodeR" size="5" />
                 <br>
             </label>
         </fieldset>
@@ -148,6 +158,7 @@
                     }
                 ],
                 division: 5,
+                nodeR: 2,
                 options: {
                     showControlPoints: true,
                     showControlLines: true,
